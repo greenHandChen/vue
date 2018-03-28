@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="../../resources/jquery/jquery-2.2.3.min.js"></script>
+    <script src="../../resources/vue/vue.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            //vue.extend
+            //包含了一个组件对象，对象含有一个template属性
+            //其中data属性是以方法的形式存在
+            var slotTest1 = Vue.extend({
+                template: '<div>发生了什么' +
+                '<slot name="slot1">天</slot>' +
+                '<slot>真无</slot>' +
+                '<slot name="slot2">邪</slot>' +
+                '</div>'
+            });
+            window.vm = new Vue({
+                el: '#slotTest',
+                components: {
+                    SlotTest: slotTest1
+                }
+            });
+            /** 使用slot分发内容 */
+            //1.编译作用域：
+            //子组件不能使用父组件定义的data属性
+            //2.单个slot
+            //子组件的内容将会是父组件默认slot的内容
+            //3.具名slot
+            //子组件内的标签带有slot属性的内容将会映射到父组件对应的slot的内容
+        });
+    </script>
+</head>
+<body>
+<div id="slotTest">
+    <slot-test>
+        <div slot="slot2">具名slot1</div>
+        <div>单个slot(默认slot)</div>
+        <div slot="slot1">具名slot2</div>
+    </slot-test>
+</div>
+</body>
+</html>

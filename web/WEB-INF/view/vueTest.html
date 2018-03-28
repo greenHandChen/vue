@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="../../resources/jquery/jquery-2.2.3.min.js"></script>
+    <script src="../../resources/vue/vue.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            function initVue() {
+                window.vm = new Vue({
+                    el: "#test",
+                    customOption: "foo",
+                    data: {
+                        name: "",
+                        directiveArr: [],
+                        myliArr: [],
+                        foo: "",
+                        total: 0
+                    },
+                    /** 生命周期 */
+                    //VUE的实例被创建时调用
+                    created: function () {
+                        console.log("我被创建拉！");
+                    },
+                    //VUE的实例发生变化时调用
+                    updated: function () {
+                        console.log("我被更新拉！");
+                    },
+                    //VUE的实例el发生变化时调用
+                    mounted: function () {
+                        console.log("el属性发生变化！")
+                    },
+                    //VUE实例销毁时调用
+                    destroyed: function () {
+                        console.log("我被销毁拉！");
+                    },
+                    methods: {
+                        createDirectiveArr: function () {
+                            vm.directiveArr.push({
+                                directiveName: "ccc"
+                            });
+                        },
+                        createmyliArr: function () {
+                            vm.myliArr.push({
+                                name: "ccc"
+                            });
+                        },
+                        incrementTotal: function () {
+                            this.total += 1;
+                        }
+                    }
+                });
+            }
+
+            var init = function () {
+                //1.自定义指令Vue.directive
+                Vue.directive("mydirective", {
+                    bind: function (el, binding) {
+                        vm.$nextTick(function () {
+                            $("#testId" + binding.value).val(binding.value);
+                        });
+                    }
+                });
+                //2.自定义组件Vue.component，需要在创建实例前声明组件
+                Vue.component('button-counter',{
+                    template: '<button v-on:click="incrementBtn">{{ btnTotal }}</button>',
+                    data: function () {
+                        return {
+                            btnTotal: 0
+                        }
+                    },
+                    methods: {
+                        incrementBtn: function () {
+                            this.btnTotal += 1;
+                            this.$emit('increment');
+                        }
+                    }
+                });
+                Vue.component("my-li", {
+                    props: ["row"],
+                    template: "<li>{{ row.name }}</li>"
+                });
+                //3.mixins混合，自身组件优先级低于mixins
+                var mixins = {
+                    created: function () {
+                        console.log("我更酷，我先执行！");
+                    }
+                };
+                initVue();
+
+                /** 实例的属性 */
+                //1.extend，自身组件优先级高于extend
+                //2.vm.$props获取全局对象属性
+                //3.vm.$el只读，获取绑定的DOM对象HTML内容
+                console.log(vm.$el);
+                //4.vm.$options只读，获取自定义属性内容
+                console.log(vm.$options.customOption);
+                //5.vm.$parent只读，获取父组件实例
+                console.log(vm.$parent);
+                //6.vm.$root只读，获取根组件实例，没有根组件实例的话，将会是自己=>vue实例？
+                console.log(vm.$root);
+                /** 实例方法/事件 */
+                // 1.$on监听
+                vm.$on('add-line',function (val) {
+                    vm.myliArr.push({
+                        name: val
+                    });
+                });
+                // 2.$emit触发自定义事件
+                vm.$emit('add-line','ceh');
+                /**实例方法/生命周期*/
+                //1. vm.$mount()，手动挂载实例
+                //vm.$mount();
+                //2. vm.$forceUpdate(),手动更新，迫使实例重新渲染数据
+                vm.$forceUpdate();
+                //3. vm.$nextTick(), 延迟调用，当vm挂载的DOM对象完成渲染后调用
+                //4. vm.$destroy(), 销毁实例
+                //vm.$destroy();
+            }();
+        });
+    </script>
+</head>
+<body>
+
+<div id="test">
+    <input type="checkbox" checked="checked" disabled/>
+    <button style="width: 50px;height: 30px;" type="button" @click="createDirectiveArr">添加1</button>
+    <button style="width: 50px;height: 30px;" type="button" @click="createmyliArr">添加2</button>
+    <button @add-line>添加3</button>
+    <p>{{ total }}</p>
+    <button-counter @increment="incrementTotal"></button-counter>
+    <button-counter @increment="incrementTotal"></button-counter>
+    <table>
+        <tr v-for="(row,index) in directiveArr">
+            <td>
+                <input type="text" :id="'testId' + index" v-mydirective="index"/>
+            </td>
+        </tr>
+    </table>
+    <ol>
+        <my-li v-for="row in myliArr" :row="row"></my-li>
+    </ol>
+
+</div>
+<div id="test1">
+
+</div>
+
+</body>
+</html>
